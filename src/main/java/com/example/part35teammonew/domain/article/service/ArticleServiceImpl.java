@@ -14,6 +14,7 @@ import com.example.part35teammonew.domain.notification.service.NotificationServi
 import com.example.part35teammonew.exeception.RestApiException;
 import com.example.part35teammonew.exeception.errorcode.ArticleErrorCode;
 import java.io.File;
+import java.io.FileWriter;
 import java.nio.file.Files;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -128,17 +129,25 @@ public class ArticleServiceImpl implements ArticleService {
   // 기사 삭제
   @Override
   public void deletePhysical(UUID id) {
-    if (articleRepository.findById(id).isPresent()) {
+    Optional<Article> articleOptional = articleRepository.findById(id);
+    if (articleOptional.isPresent()) {
+      Article article = articleOptional.get();
+
+      // DB 삭제
       articleRepository.deleteById(id);
+
+      // S3 삭제
+      s3UploadArticle.removeArticleFromS3Json(article.getTitle());
       return;
     }
     throw new RestApiException(ArticleErrorCode.ARTICLE_NOT_FOUND, "해당 ID의 기사를 찾을 수 없습니다.");
   }
 
+
+
+
   @Override
   public void deleteLogical(UUID id) {
-    //deletedAt 존재하며 현재 시간보다 이전이면 제거된 것으로 침
-    //다른 검색 메서드에서도 포함시켜야할 듯
     Optional<Article> article = articleRepository.findById(id);
     if (article.isPresent()) {
       article.get().logicalDelete(LocalDateTime.now());
