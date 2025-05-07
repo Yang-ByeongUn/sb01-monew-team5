@@ -61,8 +61,7 @@ public class ArticleServiceImpl implements ArticleService {
     Article article = new Article(dto);
     Article saved = articleRepository.save(article);//저장
 
-    ArticleViewDto articleViewDto = articleViewServiceInterface.createArticleView(
-        saved.getId());//뷰테이블 만듬
+    ArticleViewDto articleViewDto = articleViewServiceInterface.createArticleView(saved.getId());//뷰테이블 만듬
 
     //관심사, 키워드 추출
     String articleTitle = article.getTitle();
@@ -204,9 +203,21 @@ public class ArticleServiceImpl implements ArticleService {
       String after, int limit, String userId) {
 
     Sort sort = switch (SortField.valueOf(orderBy)) {
-      case publishDate -> Sort.by(Sort.Direction.fromString(direction), "date");
-      case commentCount -> Sort.by(Sort.Direction.fromString(direction), "commentCount");
-      case viewCount -> Sort.by(Sort.Direction.fromString(direction), "viewCount");
+      //case publishDate -> Sort.by(Sort.Direction.fromString(direction), "date");
+      case publishDate -> Sort.by(
+          Sort.Order.by("date").with(Sort.Direction.fromString(direction)),
+          Sort.Order.by("title").with(Sort.Direction.ASC) // 보조 정렬
+      );
+      //case commentCount -> Sort.by(Sort.Direction.fromString(direction), "commentCount");
+      case commentCount -> Sort.by(
+          Sort.Order.by("commentCount").with(Sort.Direction.fromString(direction)),
+          Sort.Order.by("title").with(Sort.Direction.ASC)
+      );
+      //case viewCount -> Sort.by(Sort.Direction.fromString(direction), "viewCount");
+      case viewCount -> Sort.by(
+          Sort.Order.by("viewCount").with(Sort.Direction.fromString(direction)),
+          Sort.Order.by("title").with(Sort.Direction.ASC)
+      );
     };
 
     int page = 0;
@@ -228,7 +239,7 @@ public class ArticleServiceImpl implements ArticleService {
     LocalDateTime from = null;
     if (publishDateFrom != null && !publishDateFrom.isBlank()) {
       from = LocalDateTime.parse(publishDateFrom);
-      System.out.println("from = " + from);
+      //System.out.println("from = " + from);
     } else {
       from = LocalDate.now().atStartOfDay();
     }
@@ -236,16 +247,29 @@ public class ArticleServiceImpl implements ArticleService {
     LocalDateTime to = null;
     if (publishDateTo != null && !publishDateTo.isBlank()) {
       to = LocalDateTime.parse(publishDateTo);
-      System.out.println("to = " + to);
+      //System.out.println("to = " + to);
     } else {
       to = LocalDate.now().plusDays(1).atStartOfDay();
     }
 
     List<String> sources =
         (sourceIn != null && sourceIn.length > 0) ? Arrays.asList(sourceIn) : null;
-
     Page<Article> result;
-    if (sources != null) {
+
+    if( keyword != null && !keyword.isBlank()) {
+      keyword = "%" + keyword + "%";
+      if(sources != null) {
+        result = articleRepository.searchArticlesWithKeywordAndSources(
+            keyword, interestUUID, from, to, sources, pageable
+        );
+      }else {
+        result = articleRepository.searchArticlesWithoutAll(keyword, from, to, pageable);
+      }
+    }else {
+      result = articleRepository.searchArticlesWithDate(from, to, pageable);
+    }
+
+    /*if (sources != null) {
       result = articleRepository.searchArticlesWithSources(
           keyword, interestUUID, from, to, sources, pageable
       );
@@ -254,7 +278,7 @@ public class ArticleServiceImpl implements ArticleService {
       result = articleRepository.searchArticlesWithoutAll(keyword, from, to, pageable);
     } else {
       result = articleRepository.searchArticlesWithDate(from, to, pageable);
-    }
+    }*/
 
     List<ArticleBaseDto> content = result.getContent().stream()
         .map(ArticleBaseDto::new)
@@ -270,7 +294,7 @@ public class ArticleServiceImpl implements ArticleService {
     response.setSize(limit);
     response.setTotalElements((int) result.getTotalElements());
     response.setHasNext(String.valueOf(result.hasNext()));
-    response.setNextCursor(String.valueOf(page + 1));
+    response.setNextCursor(result.hasNext() ? String.valueOf(page + 1) : null);
     response.setNextAfter(nextAfter);
 
     return response;

@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2025-04-28T16:35:21+0900",
+    date = "2025-05-06T10:50:20+0900",
     comments = "version: 1.5.3.Final, compiler: javac, environment: Java 17.0.12 (Oracle Corporation)"
 )
 @Component
@@ -23,17 +23,15 @@ public class ArticleViewMapperImpl implements ArticleViewMapper {
         }
 
         UUID articleId = null;
-        Long count = null;
         Set<UUID> readUserIds = null;
 
         articleId = articleView.getArticleId();
-        count = articleView.getCount();
         Set<UUID> set = articleView.getReadUserIds();
         if ( set != null ) {
             readUserIds = new LinkedHashSet<UUID>( set );
         }
 
-        ArticleViewDto articleViewDto = new ArticleViewDto( articleId, count, readUserIds );
+        ArticleViewDto articleViewDto = new ArticleViewDto( articleId, readUserIds );
 
         return articleViewDto;
     }

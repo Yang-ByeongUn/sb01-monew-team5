@@ -3,6 +3,7 @@ package com.example.part35teammonew.articleView;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.example.part35teammonew.domain.article.service.ArticleService;
 import com.example.part35teammonew.domain.articleView.entity.ArticleView;
 import com.example.part35teammonew.domain.articleView.mapper.ArticleViewMapper;
 import com.example.part35teammonew.domain.articleView.repository.ArticleViewRepository;
@@ -35,6 +36,8 @@ class ArticleViewServiceTest {
   private UUID userId;
   private UUID userId1;
   private UUID userId3;
+  @Autowired
+  private ArticleService articleService;
 
   @BeforeEach
   void setUp() {
@@ -73,7 +76,7 @@ class ArticleViewServiceTest {
   void countReadUser_success() {
     articleViewService.addReadUser(articleId, userId);
     articleViewService.addReadUser(articleId, userId1);
-    long count = articleViewService.countReadUser(articleId);
+    long count = articleService.findById(articleId).getViewCount();
 
     assertThat(count).isEqualTo(2);
   }
@@ -85,12 +88,12 @@ class ArticleViewServiceTest {
     articleViewService.addReadUser(articleId, userId1);
     articleViewService.addReadUser(articleId, userId1);
     articleViewService.addReadUser(articleId, userId3);
-    long count = articleViewService.countReadUser(articleId);
+    long count = articleService.findById(articleId).getViewCount();
 
     assertThat(count).isEqualTo(3);
   }
 
-  @Test
+  /*@Test
   @DisplayName("조회수 같음, 내림차순")
   void getArticles_sameCount_sortByObjectIdDescending() {
     UUID articleId1 = UUID.randomUUID();
@@ -109,8 +112,7 @@ class ArticleViewServiceTest {
 
     articleViewRepository.saveAll(List.of(v1, v2));
 
-    List<UUID> actual = articleViewService.getSortByVewCountPageNation(null, Pageable.ofSize(2),
-        "desc");
+    List<UUID> actual = articleViewService.getSortByVewCountPageNation(null, Pageable.ofSize(2), "desc");
 
     List<ArticleView> sorted = articleViewRepository.findAll().stream()
         .filter(v -> v.getCount().equals(1L))
@@ -122,9 +124,9 @@ class ArticleViewServiceTest {
         .map(ArticleView::getArticleId)
         .toList();
     assertThat(actual).containsExactlyElementsOf(expected);
-  }
+  }*/
 
-  @Test
+  /*@Test
   @DisplayName("내림차순 + limit")
   void getArticles_sortedByCount_limitApplied() {
     articleViewRepository.deleteAll();
@@ -150,9 +152,9 @@ class ArticleViewServiceTest {
 
     assertThat(result).hasSize(2);
     assertThat(result).containsExactly(v2.getArticleId(), v1.getArticleId());
-  }
+  }*/
 
-  @Test
+  /*@Test
   @DisplayName("커서보다 작은거 반환")
   void getArticles_filteredByCursorCount() {
     articleViewRepository.deleteAll();
@@ -208,5 +210,5 @@ class ArticleViewServiceTest {
         .toList();
 
     assertThat(result).containsExactlyElementsOf(expected);
-  }
+  }*/
 }

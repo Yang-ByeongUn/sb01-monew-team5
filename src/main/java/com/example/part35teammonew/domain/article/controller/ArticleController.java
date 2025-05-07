@@ -27,6 +27,7 @@ import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -37,7 +38,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequiredArgsConstructor
 public class ArticleController {
 
   private final ArticleService articleService;
@@ -48,6 +48,24 @@ public class ArticleController {
   private final ArticleInfoViewMapper articleInfoViewMapper;
   private final CommentService commentService;
 
+  public ArticleController(
+      ArticleService articleService,
+      JobLauncher jobLauncher,
+      @Qualifier("backupJob") Job backupJob,
+      ArticleViewServiceInterface articleViewServiceInterface,
+      UserActivityServiceInterface userActivityServiceInterface,
+      ArticleInfoViewMapper articleInfoViewMapper,
+      CommentService commentService
+  ) {
+    this.articleService = articleService;
+    this.jobLauncher = jobLauncher;
+    this.backupJob = backupJob;
+    this.articleViewServiceInterface = articleViewServiceInterface;
+    this.userActivityServiceInterface = userActivityServiceInterface;
+    this.articleInfoViewMapper = articleInfoViewMapper;
+    this.commentService = commentService;
+  }
+  //
 
   @PostMapping("/api/articles/{articleId}/article-views")
   public ResponseEntity<ArticleEnrollmentResponse> articleViewEnrollment(

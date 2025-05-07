@@ -3,6 +3,7 @@ package com.example.part35teammonew.domain.article.repository;
 import com.example.part35teammonew.domain.article.entity.Article;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -31,7 +32,7 @@ public interface ArticleRepository extends JpaRepository<Article, UUID> {
         AND (:to IS NULL OR a.date <= :to)
         AND (:sources IS NULL OR a.source IN :sources)
       """)
-  Page<Article> searchArticlesWithSources(
+  Page<Article> searchArticlesWithKeywordAndSources(
       @Param("keyword") String keyword,
       @Param("interestId") UUID interestId,
       @Param("from") LocalDateTime from,
@@ -40,7 +41,8 @@ public interface ArticleRepository extends JpaRepository<Article, UUID> {
       Pageable pageable
   );
 
-  @Query("""
+
+  /*@Query("""
       SELECT a FROM Article a
       WHERE a.deletedAt IS NULL
         AND (:keyword IS NULL OR a.title LIKE :keyword)
@@ -54,7 +56,7 @@ public interface ArticleRepository extends JpaRepository<Article, UUID> {
       @Param("from") LocalDateTime from,
       @Param("to") LocalDateTime to,
       Pageable pageable
-  );
+  );*/
 
   @Query("""
         SELECT a FROM Article a
@@ -75,5 +77,8 @@ public interface ArticleRepository extends JpaRepository<Article, UUID> {
           AND a.date >= :from
           AND a.date <= :to
       """)
-  Page<Article> searchArticlesWithDate(LocalDateTime from, LocalDateTime to, Pageable pageable);
+  Page<Article> searchArticlesWithDate(
+      @Param("from") LocalDateTime from,
+      @Param("to") LocalDateTime to,
+      Pageable pageable);
 }

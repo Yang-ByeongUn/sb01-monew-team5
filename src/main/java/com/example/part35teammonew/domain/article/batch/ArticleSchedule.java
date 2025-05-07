@@ -7,11 +7,11 @@ import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.Scheduled;
 
 @Configuration
-@RequiredArgsConstructor
 public class ArticleSchedule {
 
   private final JobLauncher jobLauncher;
@@ -19,8 +19,19 @@ public class ArticleSchedule {
   private final Job backupJob;
   private final Job S3BatchJob;
 
+  //
+  public ArticleSchedule(JobLauncher jobLauncher,
+      @Qualifier("articleJob") Job articleJob,
+      @Qualifier("backupJob") Job backupJob,
+      @Qualifier("S3BatchJob") Job S3BatchJob) {
+    this.jobLauncher = jobLauncher;
+    this.articleJob = articleJob;
+    this.backupJob = backupJob;
+    this.S3BatchJob = S3BatchJob;
+  }
+  //
 
-  @Scheduled(cron = "40 29 * * * *") //매 시 5 분
+  @Scheduled(cron = "10 34 * * * *") //매 시 5 분
   public void runArticleJob() throws Exception {
     JobParameters jobParameters = new JobParametersBuilder().addLong("time", System.currentTimeMillis()) // 중복 방지용
         .toJobParameters();
