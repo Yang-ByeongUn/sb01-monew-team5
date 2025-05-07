@@ -48,6 +48,7 @@ public class ArticleController {
   private final ArticleInfoViewMapper articleInfoViewMapper;
   private final CommentService commentService;
 
+  //
   public ArticleController(
       ArticleService articleService,
       JobLauncher jobLauncher,
@@ -97,8 +98,8 @@ public class ArticleController {
     CommentPageResponse comments = commentService.getComments(articleId, null, null, null, null, null, null);
     articleEnrollmentResponse.setArticleCommentCount(comments.getSize());
     articleEnrollmentResponse.setArticleViewCount(articleBaseDto.getViewCount());
-
     userActivityServiceInterface.addArticleInfoView(requestUserId, articleInfoViewMapper.toDto(articleEnrollmentResponse, requestUserId));
+
 
     return ResponseEntity.ok(articleEnrollmentResponse);
   }

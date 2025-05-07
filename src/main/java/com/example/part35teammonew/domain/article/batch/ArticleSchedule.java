@@ -18,7 +18,7 @@ public class ArticleSchedule {
   private final Job articleJob;
   private final Job backupJob;
   private final Job S3BatchJob;
-
+  
   //
   public ArticleSchedule(JobLauncher jobLauncher,
       @Qualifier("articleJob") Job articleJob,
@@ -37,7 +37,7 @@ public class ArticleSchedule {
         .toJobParameters();
     jobLauncher.run(articleJob, jobParameters);
   }
-  @Scheduled(cron = "0 43 0 * * *") //매 시 15분
+  @Scheduled(cron = "0 15 0 * * *") //매 시 15분
   public void runS3Job() throws Exception {
     JobParameters jobParameters = new JobParametersBuilder().addLong("time", System.currentTimeMillis())
         .toJobParameters();
@@ -57,12 +57,12 @@ public class ArticleSchedule {
 
     LocalDate today = LocalDate.now();
     for (File file : files) {
-      String fileDate = file.getName().substring(9, 19);
+      String fileDate = file.getName().substring(9, 19); // "articles_2025-04-24.json" 에서 날짜 추출
       if (!fileDate.equals(today.toString())) {
         if (file.delete()) {
-          System.out.println("🧼 오래된 백업 삭제: " + file.getName());
+          //System.out.println(" 오래된 백업 삭제: " + file.getName());
         } else {
-          System.err.println("⚠️ 삭제 실패: " + file.getAbsolutePath());
+          //System.err.println(" 삭제 실패: " + file.getAbsolutePath());
         }
       }
     }

@@ -63,15 +63,17 @@ public class ArticleServiceImpl implements ArticleService {
     ArticleViewDto articleViewDto = articleViewServiceInterface.createArticleView(saved.getId());//뷰테이블 만듬
 
     //관심사, 키워드 추출
-    String articleTitle = article.getTitle();
-    UUID articleId = article.getId();
-    List<Pair<String, UUID>> getInterest = interestService.getInterestList();
-    Set<UUID> containedId = new HashSet<>();
-    Set<UUID> targetUserID = new HashSet<>();//Set<UUID> 유저아이디: 구독중인 유저들
+    String articleTitle= saved.getTitle();
+    UUID articleId=saved.getId();
 
-    //title.contains()//
-    for (Pair<String, UUID> pair : getInterest) {
-      if (pair.getLeft().contains(articleTitle)) {
+    List<Pair<String,UUID>> getInterest=interestService.getInterestList();
+    Set<UUID> containedId =new HashSet<>();
+    Set<UUID> targetUserID=new HashSet<>();//Set<UUID> 유저아이디: 구독중인 유저들
+
+    //title.contains()// 안돼면 확인
+    for(Pair<String,UUID> pair:getInterest){
+      //System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+      if(articleTitle.toLowerCase().contains(pair.getLeft().toLowerCase())){
         containedId.add(pair.getRight());//Set<UUID> 관심사id 들 : 관심사 x 제목 x 키워드로 거른
         saved.setInterestId(pair.getRight());//기사의 관심사 설정
       }
@@ -79,13 +81,16 @@ public class ArticleServiceImpl implements ArticleService {
 
     //관심사, 키워드를 구독중인 유저 얼아내기
     for (UUID interestId : containedId) {
+
       List<UUID> findUser = interestUserListServiceInterface.getAllUserNowSubscribe(interestId);
       targetUserID.addAll(findUser);
     }
 
     //찾은 유저에게 알람보내기
-    for (UUID userId : targetUserID) {
-      notificationServiceInterface.addNewsNotice(userId, "관심있는 뉴스 등록", articleId);
+
+    for (UUID userId : targetUserID){
+      //System.out.println("=========================================");
+      notificationServiceInterface.addNewsNotice(userId,articleTitle+" 라는 관심있는 뉴스가 등록되었습니다",articleId);
     }
 
     return saved.getId();
@@ -117,6 +122,7 @@ public class ArticleServiceImpl implements ArticleService {
     return articles;
   }
 
+
   // 기사 삭제
   @Override
   public void deletePhysical(UUID id) {
@@ -138,6 +144,7 @@ public class ArticleServiceImpl implements ArticleService {
       throw new IllegalArgumentException("해당 ID의 기사를 찾을 수 없습니다.");
     }
   }
+
 
 
   @Override
