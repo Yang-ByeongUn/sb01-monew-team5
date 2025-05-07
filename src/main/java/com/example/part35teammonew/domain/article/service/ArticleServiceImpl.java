@@ -4,7 +4,6 @@ import com.example.part35teammonew.domain.article.batch.S3UploadArticle;
 import com.example.part35teammonew.domain.article.dto.ArticleBaseDto;
 import com.example.part35teammonew.domain.article.dto.ArticlesResponse;
 import com.example.part35teammonew.domain.article.entity.Article;
-import com.example.part35teammonew.domain.article.entity.Direction;
 import com.example.part35teammonew.domain.article.entity.SortField;
 import com.example.part35teammonew.domain.article.repository.ArticleRepository;
 import com.example.part35teammonew.domain.articleView.Dto.ArticleViewDto;
@@ -203,17 +202,14 @@ public class ArticleServiceImpl implements ArticleService {
       String after, int limit, String userId) {
 
     Sort sort = switch (SortField.valueOf(orderBy)) {
-      //case publishDate -> Sort.by(Sort.Direction.fromString(direction), "date");
       case publishDate -> Sort.by(
           Sort.Order.by("date").with(Sort.Direction.fromString(direction)),
           Sort.Order.by("title").with(Sort.Direction.ASC) // 보조 정렬
       );
-      //case commentCount -> Sort.by(Sort.Direction.fromString(direction), "commentCount");
       case commentCount -> Sort.by(
           Sort.Order.by("commentCount").with(Sort.Direction.fromString(direction)),
           Sort.Order.by("title").with(Sort.Direction.ASC)
       );
-      //case viewCount -> Sort.by(Sort.Direction.fromString(direction), "viewCount");
       case viewCount -> Sort.by(
           Sort.Order.by("viewCount").with(Sort.Direction.fromString(direction)),
           Sort.Order.by("title").with(Sort.Direction.ASC)

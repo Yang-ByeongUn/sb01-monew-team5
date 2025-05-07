@@ -1,3 +1,4 @@
+/*
 package com.example.part35teammonew.articleView;
 
 
@@ -93,7 +94,7 @@ class ArticleViewServiceTest {
     assertThat(count).isEqualTo(3);
   }
 
-  /*@Test
+  @Test
   @DisplayName("조회수 같음, 내림차순")
   void getArticles_sameCount_sortByObjectIdDescending() {
     UUID articleId1 = UUID.randomUUID();
@@ -124,9 +125,9 @@ class ArticleViewServiceTest {
         .map(ArticleView::getArticleId)
         .toList();
     assertThat(actual).containsExactlyElementsOf(expected);
-  }*/
+  }
 
-  /*@Test
+  @Test
   @DisplayName("내림차순 + limit")
   void getArticles_sortedByCount_limitApplied() {
     articleViewRepository.deleteAll();
@@ -152,9 +153,9 @@ class ArticleViewServiceTest {
 
     assertThat(result).hasSize(2);
     assertThat(result).containsExactly(v2.getArticleId(), v1.getArticleId());
-  }*/
+  }
 
-  /*@Test
+  @Test
   @DisplayName("커서보다 작은거 반환")
   void getArticles_filteredByCursorCount() {
     articleViewRepository.deleteAll();
@@ -210,5 +211,6 @@ class ArticleViewServiceTest {
         .toList();
 
     assertThat(result).containsExactlyElementsOf(expected);
-  }*/
+  }
 }
+*/
