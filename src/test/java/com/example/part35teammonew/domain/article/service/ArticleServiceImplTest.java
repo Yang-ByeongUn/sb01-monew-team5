@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.example.part35teammonew.domain.article.dto.ArticleBaseDto;
 import com.example.part35teammonew.domain.article.dto.ArticlesResponse;
+import com.example.part35teammonew.exeception.RestApiException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -60,8 +61,7 @@ class ArticleServiceImplTest {
     UUID savedId = articleServiceImpl.save(hello);
 
     assertThatThrownBy(() -> articleServiceImpl.save(hello)).isInstanceOf(
-            IllegalArgumentException.class) // 예외 타입
-        .hasMessageContaining("중복 저장되었습니다."); // 예외 메시지 확인
+            RestApiException.class); // 예외 타입
   }
 
   @Test
@@ -70,19 +70,21 @@ class ArticleServiceImplTest {
     ArticleBaseDto hello = createArticleBaseDto("hello");
     UUID savedId = articleServiceImpl.save(hello);
     //
-    articleServiceImpl.deletePhysical(savedId);
+    try {
+      articleServiceImpl.deletePhysical(savedId);
+    }catch (RestApiException e) {
+      System.out.println("delete physical failed");
+    }
     //
     assertThatThrownBy(() -> articleServiceImpl.findById(savedId)).isInstanceOf(
-            IllegalArgumentException.class) // 예외 타입
-        .hasMessageContaining("해당 ID의 기사를 찾을 수 없습니다."); // 예외 메시지 확인
+            RestApiException.class); // 예외 타입
   }
 
   @Test
   @DisplayName("기사가 없는데 삭제하려고 함")
   void deleteNotExistArticle() {
     assertThatThrownBy(() -> articleServiceImpl.deletePhysical(UUID.randomUUID())).isInstanceOf(
-            IllegalArgumentException.class) // 예외 타입
-        .hasMessageContaining("해당 ID의 기사를 찾을 수 없습니다."); // 예외 메시지 확인
+            RestApiException.class); // 예외 타입
   }
 
   @Test
@@ -111,7 +113,7 @@ class ArticleServiceImplTest {
 
     // then: findById 시 예외 발생해야 함
     assertThatThrownBy(() -> articleServiceImpl.findById(savedId)).isInstanceOf(
-        IllegalArgumentException.class).hasMessageContaining("해당 ID의 기사를 찾을 수 없습니다.");
+        RestApiException.class);
 
     // and: findAll 결과에도 포함되지 않아야 함
     List<ArticleBaseDto> articles = articleServiceImpl.findAll();

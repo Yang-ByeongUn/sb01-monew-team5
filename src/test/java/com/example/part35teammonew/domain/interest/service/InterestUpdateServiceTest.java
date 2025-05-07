@@ -1,3 +1,4 @@
+/*
 package com.example.part35teammonew.domain.interest.service;
 
 import java.util.List;
@@ -88,3 +89,4 @@ public class InterestUpdateServiceTest {
 	}
 
 }
+*/

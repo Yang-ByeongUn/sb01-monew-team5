@@ -137,14 +137,19 @@ public class ArticleServiceImpl implements ArticleService {
       articleRepository.deleteById(id);
 
       // S3 삭제
-      s3UploadArticle.removeArticleFromS3Json(article.getTitle());
+      String today = LocalDate.now().toString();
+      File file = new File("articles_" + today + ".json");
+      // 1. 다운로드
+      try {
+        //S3가 연결될 수 있는가?
+        s3UploadArticle.removeArticleFromS3Json(article.getTitle());
+      }catch (Exception e){
+        throw new RestApiException(ArticleErrorCode.S3_FILE_NOT_FOUND, "S3 Bucket에 파일이 존재하지 않습니다.");
+      }
       return;
     }
     throw new RestApiException(ArticleErrorCode.ARTICLE_NOT_FOUND, "해당 ID의 기사를 찾을 수 없습니다.");
   }
-
-
-
 
   @Override
   public void deleteLogical(UUID id) {
@@ -155,8 +160,6 @@ public class ArticleServiceImpl implements ArticleService {
       throw new RestApiException(ArticleErrorCode.ARTICLE_NOT_FOUND, "해당 ID의 기사를 찾을 수 없습니다.");
     }
   }
-
-
 
   @Override
   public List<UUID> backup(String from, String to) {
