@@ -11,6 +11,8 @@ import com.example.part35teammonew.domain.articleView.service.ArticleViewService
 import com.example.part35teammonew.domain.interest.service.InterestService;
 import com.example.part35teammonew.domain.interestUserList.service.InterestUserListServiceInterface;
 import com.example.part35teammonew.domain.notification.service.NotificationServiceInterface;
+import com.example.part35teammonew.exeception.RestApiException;
+import com.example.part35teammonew.exeception.errorcode.ArticleErrorCode;
 import java.io.File;
 import java.nio.file.Files;
 import java.time.LocalDate;
@@ -51,10 +53,10 @@ public class ArticleServiceImpl implements ArticleService {
   @Override
   public UUID save(ArticleBaseDto dto) {
     if (dto.getTitle() == null || dto.getTitle().isBlank() || dto.getPublishDate() == null) {
-      throw new IllegalArgumentException("제목과 날짜는 필수입니다.");
+      throw new RestApiException(ArticleErrorCode.ARTICLE_MiISSING_ARTICLE_FIELD_Exception, "제목과 날짜는 필수입니다.");
     }
     if (articleRepository.findByTitleAndDate(dto.getTitle(), dto.getPublishDate()) != null) {
-      throw new IllegalArgumentException("중복 저장되었습니다.");
+      throw new RestApiException(ArticleErrorCode.ARTICLE_DUPLICATED_SAVED,"중복 저장되었습니다.");
     }
 
     Article article = new Article(dto);
@@ -102,7 +104,7 @@ public class ArticleServiceImpl implements ArticleService {
     return articleRepository.findById(id)
         .filter(Article::isNotLogicallyDeleted)
         .map(ArticleBaseDto::new)
-        .orElseThrow(() -> new IllegalArgumentException("해당 ID의 기사를 찾을 수 없습니다."));
+        .orElseThrow(() -> new RestApiException(ArticleErrorCode.ARTICLE_NOT_FOUND, "해당 ID의 기사를 찾을 수 없습니다."));
   }
 
   @Override
@@ -130,7 +132,7 @@ public class ArticleServiceImpl implements ArticleService {
       articleRepository.deleteById(id);
       return;
     }
-    throw new IllegalArgumentException("해당 ID의 기사를 찾을 수 없습니다.");
+    throw new RestApiException(ArticleErrorCode.ARTICLE_NOT_FOUND, "해당 ID의 기사를 찾을 수 없습니다.");
   }
 
   @Override
@@ -141,7 +143,7 @@ public class ArticleServiceImpl implements ArticleService {
     if (article.isPresent()) {
       article.get().logicalDelete(LocalDateTime.now());
     } else {
-      throw new IllegalArgumentException("해당 ID의 기사를 찾을 수 없습니다.");
+      throw new RestApiException(ArticleErrorCode.ARTICLE_NOT_FOUND, "해당 ID의 기사를 찾을 수 없습니다.");
     }
   }
 
@@ -164,7 +166,7 @@ public class ArticleServiceImpl implements ArticleService {
           String content = Files.readString(file.toPath());
           jsonArray = new JSONArray(content);
         } else {
-          throw new IllegalArgumentException("S3 Bucket에 파일이 존재하지 않습니다.");
+          throw new RestApiException(ArticleErrorCode.S3_FILE_NOT_FOUND, "S3 Bucket에 파일이 존재하지 않습니다.");
         }
         for (int i = 0; i < jsonArray.length(); i++) {
           JSONObject obj = jsonArray.getJSONObject(i);
@@ -179,7 +181,7 @@ public class ArticleServiceImpl implements ArticleService {
           queue.add(article);
         }
       } catch (Exception e) {
-
+        throw new RestApiException(ArticleErrorCode.S3_FILE_IO_ERROR, "FILE IO 작업 중 에러 발생했습니다.");
       }
       while (!queue.isEmpty()) {
         Article article = queue.poll();
@@ -228,7 +230,7 @@ public class ArticleServiceImpl implements ArticleService {
       try {
         page = Integer.parseInt(cursor);
       } catch (NumberFormatException e) {
-        throw new IllegalArgumentException("커서는 숫자여야 합니다.");
+        throw new RestApiException(ArticleErrorCode.ARTICLE_CURSOR_IS_NUMBER,"커서는 숫자여야 합니다.");
       }
     }
 
@@ -272,16 +274,6 @@ public class ArticleServiceImpl implements ArticleService {
       result = articleRepository.searchArticlesWithDate(from, to, pageable);
     }
 
-    /*if (sources != null) {
-      result = articleRepository.searchArticlesWithSources(
-          keyword, interestUUID, from, to, sources, pageable
-      );
-    } else if (keyword != null) {
-      keyword = "%" + keyword + "%";
-      result = articleRepository.searchArticlesWithoutAll(keyword, from, to, pageable);
-    } else {
-      result = articleRepository.searchArticlesWithDate(from, to, pageable);
-    }*/
 
     List<ArticleBaseDto> content = result.getContent().stream()
         .map(ArticleBaseDto::new)
@@ -297,7 +289,7 @@ public class ArticleServiceImpl implements ArticleService {
     response.setSize(limit);
     response.setTotalElements((int) result.getTotalElements());
     response.setHasNext(String.valueOf(result.hasNext()));
-    response.setNextCursor(result.hasNext() ? String.valueOf(page + 1) : null);
+    response.setNextCursor(result.hasNext() ? String.valueOf(page + 1) : null); //변경했는데 확인 못함
     response.setNextAfter(nextAfter);
 
     return response;

@@ -1,5 +1,6 @@
 package com.example.part35teammonew.domain.article.controller;
 
+import com.example.part35teammonew.domain.article.controller.docs.ArticleApi;
 import com.example.part35teammonew.domain.article.dto.ArticleBaseDto;
 import com.example.part35teammonew.domain.article.dto.ArticleCursorRequest;
 import com.example.part35teammonew.domain.article.dto.ArticleEnrollmentResponse;
@@ -14,6 +15,8 @@ import com.example.part35teammonew.domain.comment.dto.CommentPageResponse;
 import com.example.part35teammonew.domain.comment.service.CommentService;
 import com.example.part35teammonew.domain.userActivity.maper.ArticleInfoViewMapper;
 import com.example.part35teammonew.domain.userActivity.service.UserActivityServiceInterface;
+import com.example.part35teammonew.exeception.RestApiException;
+import com.example.part35teammonew.exeception.errorcode.ArticleErrorCode;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -38,7 +41,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class ArticleController {
+public class ArticleController implements ArticleApi {
 
   private final ArticleService articleService;
   private final JobLauncher jobLauncher;
@@ -78,7 +81,7 @@ public class ArticleController {
     try {
       requestUserId = UUID.fromString(userId);
     } catch (IllegalArgumentException e) {
-      throw new IllegalArgumentException("유효하지 않은 사용자 ID 형식입니다");
+      throw new RestApiException(ArticleErrorCode.ARTICLE_PARSE_UUID,"유효하지 않은 사용자 ID 형식입니다");
     }
 
     if(articleViewServiceInterface.addReadUser(articleId, requestUserId)){

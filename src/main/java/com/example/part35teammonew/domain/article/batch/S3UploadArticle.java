@@ -3,6 +3,8 @@ package com.example.part35teammonew.domain.article.batch;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.example.part35teammonew.exeception.RestApiException;
+import com.example.part35teammonew.exeception.errorcode.ArticleErrorCode;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -31,7 +33,7 @@ public class S3UploadArticle {
       PutObjectRequest request = new PutObjectRequest(bucketName, filename, inputStream, metadata);
       amazonS3Client.putObject(request);
     } catch (Exception e) {
-      throw new IllegalArgumentException("Failed to upload file to S3", e);
+      throw new RestApiException(ArticleErrorCode.S3_FAIL_TO_UPLOAD, "Failed to upload file to S3");
     }
   }
 
@@ -39,7 +41,7 @@ public class S3UploadArticle {
     try {
       amazonS3Client.deleteObject(bucketName, filename);
     } catch (Exception e) {
-      throw new IllegalArgumentException(e);
+      throw new RestApiException(ArticleErrorCode.S3_FAIL_TO_UPLOAD,"S3 파일 삭제 중 오류 발생");
     }
   }
   public boolean exists(String fileName){
@@ -53,7 +55,7 @@ public class S3UploadArticle {
           .getObjectContent()
           .transferTo(outputStream);
     } catch (Exception e) {
-      throw new IllegalArgumentException("S3에서 파일 다운로드 실패: " + file.getName(), e);
+      throw new RestApiException(ArticleErrorCode.S3_FAIL_TO_UPLOAD,"S3 파일 다운로드 중 오류 발생");
     }
   }
 }

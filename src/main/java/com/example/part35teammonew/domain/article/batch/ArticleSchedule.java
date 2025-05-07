@@ -31,9 +31,9 @@ public class ArticleSchedule {
   }
   //
 
-  @Scheduled(cron = "10 34 * * * *") //매 시 5 분
+  @Scheduled(cron = "10 30 * * * *") //매 시 5 분
   public void runArticleJob() throws Exception {
-    JobParameters jobParameters = new JobParametersBuilder().addLong("time", System.currentTimeMillis()) // 중복 방지용
+    JobParameters jobParameters = new JobParametersBuilder().addLong("time", System.currentTimeMillis())
         .toJobParameters();
     jobLauncher.run(articleJob, jobParameters);
   }
