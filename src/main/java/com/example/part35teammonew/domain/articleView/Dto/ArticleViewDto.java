@@ -1,4 +1,4 @@
-package com.example.part35teammonew.domain.articleView.Dto;
+package com.example.part35teammonew.domain.articleView.dto;
 
 
 import java.util.Set;
